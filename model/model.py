@@ -6,8 +6,10 @@ from torch.optim import AdamW
 from typing import Union, List
 from torch.utils.data import DataLoader, Dataset
 
+
+
 class BertModel(pl.LightningModule):
-    def __init__(self, model_path = None, num_classes = num_classes, batch_size = 8, learning_rate = 2e-5):
+    def __init__(self, model_path = None, num_classes = num_classes, batch_size = 8, learning_rate = 2e-5, data_base_path = "./data/snli_1.0"):
         super().__init__()
         if(model_path is None):
             self.model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels= num_classes)
@@ -15,7 +17,7 @@ class BertModel(pl.LightningModule):
             self.model = BertForSequenceClassification.from_pretrained(model_path)
         self.batch_size = batch_size
         self.lr = learning_rate
-
+        self.data_base_path = data_base_path
     def forward(self, X):
         input_ids = X["input_ids"]
         attention_mask = X["attention_mask"]
@@ -84,18 +86,18 @@ class BertModel(pl.LightningModule):
 
 
     def train_dataloader(self) -> DataLoader:
-        snli = SNLI_dataset("./data/snli_1.0", "train")
+        snli = SNLI_dataset(self.data_base_path, "train")
         dataloader = DataLoader(dataset= snli , batch_size= self.batch_size,shuffle= True,collate_fn= snli.collate_fn, drop_last= True)
         return dataloader
     
 
     def val_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
-        snli = SNLI_dataset("./data/snli_1.0", "dev")
+        snli = SNLI_dataset(self.data_base_path, "dev")
         dataloader = DataLoader(dataset= snli , batch_size= self.batch_size,collate_fn= snli.collate_fn, drop_last= True)
         return dataloader
 
 
     def test_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
-        snli = SNLI_dataset("./data/snli_1.0", "dev")
+        snli = SNLI_dataset(self.data_base_path, "dev")
         dataloader = DataLoader(dataset= snli , batch_size= self.batch_size,collate_fn= snli.collate_fn, drop_last= True)
         return dataloader
