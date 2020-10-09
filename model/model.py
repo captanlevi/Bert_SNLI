@@ -26,6 +26,8 @@ class BertModel(pl.LightningModule):
         result = self.model(input_ids, token_type_ids = token_type_ids,
             attention_mask = attention_mask
         )
+
+        return result
         
 
     def _common_step(self,batch, batch_idx):
